@@ -1,6 +1,6 @@
 #include <Windows.h>
 #include <gl\GL.h>
-#include <glut.h>
+#include <GL\glut.h>
 #define WIDTH 480
 #define HEIGHT 480
 
