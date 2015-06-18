@@ -1,6 +1,7 @@
+#pragma once
 #include <Windows.h>
 #include <gl\GL.h>
-#include <GL\glut.h>
+#include <glut.h>
 #include "Grid.h"
 
 #define WIDTH 400
