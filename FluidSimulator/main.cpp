@@ -21,6 +21,7 @@ void display(){
 
 void reshape(int width, int height) {
 	grid = new Grid(width, height, 100);
+	grid->showVectorField();
 	/*for (int i = 0; i < width; i++){
 		for (int j = 0; j < height; j++){
 			if (i == 0 || i == width - 1 || j == 0 || j == height - 1)

@@ -2,9 +2,10 @@ enum CellType {FREE, FLUID, SOLID};
 
 class Cell{
 	
-	float u, v, p;
+
 
 public:
+	float u, v, p;
 	CellType cellType;
 	Cell();
 	Cell(CellType type, float u0, float v0, float p0);

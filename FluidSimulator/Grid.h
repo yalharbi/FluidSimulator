@@ -11,11 +11,14 @@ class Grid
 	int width, height;
 	float cellSize;
 	Cell ** cells;
+	bool drawVectorField;
 
 public:
 	Grid();
 	Grid(int w, int h, float cellSize);
 	void draw();
 	void setCell(int i, int j, CellType cellType);
+	void showVectorField();
+	void hideVectorField();
 };
 

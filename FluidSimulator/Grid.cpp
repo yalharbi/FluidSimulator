@@ -10,6 +10,8 @@ Grid::Grid(int w, int h, float cSize){
 	width = w/cSize;
 	height = h/cSize;
 	cellSize = cSize;
+	drawVectorField = false;
+
 	cells = new Cell*[width];
 	for (int i = 0; i < width; i++){
 		cells[i] = new Cell[height];
@@ -34,11 +36,29 @@ void Grid::draw(){
 			glVertex3f(i*cellSize - OFFSET + cellSize, j*cellSize - OFFSET + cellSize, 0);
 			glVertex3f(i*cellSize + OFFSET, j*cellSize - OFFSET + cellSize, 0);
 			glEnd();
+
+			if (drawVectorField){
+				std::cout << cell.u << " " << cell.v;
+				glBegin(GL_LINES);
+				glColor3f(1, 1, 1);
+				glVertex3f(i*cellSize + cellSize / 2, j*cellSize+ cellSize / 2, 0);
+				glVertex3f(i*cellSize + cellSize / 2 + cell.u,  j*cellSize  + cellSize / 2 + cell.v, 0);
+				glEnd();
+			}
 		}
 	}
 
+	
 }
 
 void Grid::setCell(int i, int j, CellType cType){
 	cells[i][j].cellType = cType;
+}
+
+void Grid::showVectorField(){
+	drawVectorField = true;
+}
+
+void Grid::hideVectorField(){
+	drawVectorField = false;
 }

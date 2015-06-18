@@ -3,7 +3,7 @@
 Cell::Cell(){
 	cellType = FREE;
 	u = 0;
-	v = 0;
+	v = -9.8;
 	p = 0;
 }
 
