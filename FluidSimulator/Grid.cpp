@@ -1,5 +1,5 @@
 #include "Grid.h"
-#define OFFSET 10
+
 
 Grid::Grid()
 {
@@ -11,7 +11,7 @@ Grid::Grid(int w, int h, float cSize){
 	height = h/cSize;
 	cellSize = cSize;
 	drawVectorField = false;
-
+	offset = cellSize / 10;
 	cells = new Cell*[width];
 	for (int i = 0; i < width; i++){
 		cells[i] = new Cell[height];
@@ -31,19 +31,27 @@ void Grid::draw(){
 			else
 				glColor3f(0, 0, 1);
 
-			glVertex3f(i*cellSize + OFFSET, j*cellSize + OFFSET, 0);
-			glVertex3f(i*cellSize - OFFSET + cellSize, j*cellSize + OFFSET, 0);
-			glVertex3f(i*cellSize - OFFSET + cellSize, j*cellSize - OFFSET + cellSize, 0);
-			glVertex3f(i*cellSize + OFFSET, j*cellSize - OFFSET + cellSize, 0);
+			glVertex3f(i*cellSize + offset, j*cellSize + offset, 0);
+			glVertex3f(i*cellSize - offset + cellSize, j*cellSize + offset, 0);
+			glVertex3f(i*cellSize - offset + cellSize, j*cellSize - offset + cellSize, 0);
+			glVertex3f(i*cellSize + offset, j*cellSize - offset + cellSize, 0);
 			glEnd();
 
 			if (drawVectorField){
-				std::cout << cell.u << " " << cell.v;
 				glBegin(GL_LINES);
 				glColor3f(1, 1, 1);
-				glVertex3f(i*cellSize + cellSize / 2, j*cellSize+ cellSize / 2, 0);
-				glVertex3f(i*cellSize + cellSize / 2 + cell.u,  j*cellSize  + cellSize / 2 + cell.v, 0);
+				if (cell.u>cellSize/2) cell.u = cellSize / 2;
+				if (cell.v>cellSize/2) cell.v = cellSize / 2;
+				glVertex3f(i*cellSize + cellSize / 2 - cell.u, j*cellSize + cellSize / 2 - cell.v, 0);
+				glVertex3f(i*cellSize + cellSize / 2 + cell.u/2,  j*cellSize  + cellSize / 2 + cell.v/2, 0);
 				glEnd();
+
+				glPointSize(2);
+				glBegin(GL_POINTS);
+				glColor3f(1, 1, 0);
+				glVertex3f(i*cellSize + cellSize / 2 + cell.u / 2, j*cellSize + cellSize / 2 + cell.v / 2, 0);
+				glEnd();
+
 			}
 		}
 	}

@@ -30,7 +30,7 @@ void reshape(int width, int height) {
 	}*/
 	grid->setCell(2, 1, FLUID);
 	glViewport(0, 0, width, height);
-	gluOrtho2D(0,width,height, 0);
+	gluOrtho2D(0,width,0, height);
 }
 
 int main(int argc, char** argv){

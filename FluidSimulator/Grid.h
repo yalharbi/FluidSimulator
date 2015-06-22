@@ -9,7 +9,7 @@
 class Grid
 {
 	int width, height;
-	float cellSize;
+	float cellSize, offset;
 	Cell ** cells;
 	bool drawVectorField;
 
