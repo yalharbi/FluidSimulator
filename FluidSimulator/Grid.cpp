@@ -20,8 +20,8 @@ Grid::Grid(int w, int h, float cSize){
 }
 
 void Grid::draw(){
-	
 
+	
 	for (int i = 0; i < width; i++){
 		for (int j = 0; j < height; j++){
 			Cell cell = cells[i][j];
@@ -55,8 +55,15 @@ void Grid::draw(){
 			}
 		}
 	}
-
-	
+	float xyz[3];
+	float * pos = getCellPosition(2, 1);
+	xyz[0] = pos[0]; xyz[1] = pos[1]; xyz[2] = pos[2];
+	std::cout << pos[0] << "-" << pos[1] << "\n";
+	glPointSize(5);
+	glBegin(GL_POINTS);
+	glColor3f(1, 1, 1);
+	glVertex3fv(xyz);
+	glEnd();
 }
 
 void Grid::setCell(int i, int j, CellType cType){
@@ -69,4 +76,23 @@ void Grid::showVectorField(){
 
 void Grid::hideVectorField(){
 	drawVectorField = false;
+}
+
+float Grid::getCellSize(){
+	return cellSize;
+}
+
+float Grid::getMaxVelocity(){
+	// TODO
+	return 9.8;
+}
+
+float * Grid::getCellPosition(int i, int j){
+	float xyz[3];
+
+	xyz[0] = i*cellSize + cellSize / 2;
+	xyz[1] = j*cellSize + cellSize / 2;
+	xyz[2] = 0; //3D
+
+	return xyz;
 }

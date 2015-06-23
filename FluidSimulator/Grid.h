@@ -8,17 +8,20 @@
 
 class Grid
 {
-	int width, height;
 	float cellSize, offset;
 	Cell ** cells;
 	bool drawVectorField;
 
 public:
+	int width, height;
 	Grid();
 	Grid(int w, int h, float cellSize);
 	void draw();
 	void setCell(int i, int j, CellType cellType);
 	void showVectorField();
 	void hideVectorField();
+	float getCellSize();
+	float getMaxVelocity();
+	float * getCellPosition(int i, int j);
 };
 
