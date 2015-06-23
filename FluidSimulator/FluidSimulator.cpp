@@ -26,6 +26,12 @@ void FluidSimulator::advectVelocity(){
 
 void FluidSimulator::advectCell(int i, int j){
 	float * position = simulationGrid->getCellPosition(i, j);
+	float * apprU = approximateVelocity(position);
+}
+
+float * FluidSimulator::approximateVelocity(float *){
+	
+
 }
 
 void FluidSimulator::advectPressure(){

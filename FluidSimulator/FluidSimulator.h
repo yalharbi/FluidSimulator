@@ -8,6 +8,7 @@ class FluidSimulator
 	void advectVelocity();
 	void advectPressure();
 	void advectCell(int i, int j);
+	float * approximateVelocity(float * pos);
 	float dt;
 
 public:
