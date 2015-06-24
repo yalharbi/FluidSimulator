@@ -1,3 +1,5 @@
+
+
 enum CellType {FREE, FLUID, SOLID};
 
 class Cell{
