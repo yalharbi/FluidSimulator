@@ -10,12 +10,19 @@
 
 FluidSimulator *simulator;
 Grid* grid;
-
+int time = 0;;
 void display(){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	simulator->draw();
-	
+
+	time++;
+	if (time >= 100){
+		simulator->advect(simulator->computeTimeStep());
+		time = 0;
+	}
+
+
 
 
 	glutSwapBuffers();
@@ -23,7 +30,7 @@ void display(){
 }
 
 void reshape(int width, int height) {
-	simulator = new FluidSimulator(width, height, 100);
+	simulator = new FluidSimulator(width, height, 50);
 	/*grid = new Grid(width, height, 100);
 	grid->showVectorField();
 	/*for (int i = 0; i < width; i++){
@@ -37,6 +44,10 @@ void reshape(int width, int height) {
 	gluOrtho2D(0,width,0, height);
 }
 
+void idle(){
+	glutPostRedisplay();
+}
+
 int main(int argc, char** argv){
 	//initialization
 	glutInit(&argc, argv);
@@ -46,8 +57,7 @@ int main(int argc, char** argv){
 	glutCreateWindow("Grid-Based Fluid Simulator - Yazeed Alharbi - Professor Tricoche - Summer 2015");
 	glutReshapeFunc(reshape);
 	glutDisplayFunc(display);
-	
-	
+	glutIdleFunc(idle);
 
 	glutMainLoop();
 

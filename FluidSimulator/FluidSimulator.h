@@ -4,7 +4,7 @@
 class FluidSimulator
 {
 	Grid* simulationGrid;
-	void advect(float timeStep);
+	
 	void advectVelocity();
 	void advectPressure();
 	
@@ -14,7 +14,8 @@ class FluidSimulator
 public:
 	FluidSimulator();
 	FluidSimulator(int width, int height, int cellSize);
-	Vector advectCell(int i, int j);
+	Cell advectCell(int i, int j);
+	void advect(float timeStep);
 	void simulateAndDraw();
 	void simulateAndDraw(float timeStep);
 	float computeTimeStep();

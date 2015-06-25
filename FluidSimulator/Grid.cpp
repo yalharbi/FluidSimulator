@@ -17,6 +17,15 @@ Grid::Grid(int w, int h, float cSize){
 		cells[i] = new Cell[height];
 	}
 
+	for (int i = 0; i < width; i++){
+		cells[i][height - 1].v = 0;
+	}
+
+	for (int j = 0; j < height; j++){
+		cells[0][j].u = 0;
+		cells[width-1][j].u = 0;
+	}
+
 }
 
 void Grid::draw(){
@@ -56,7 +65,7 @@ void Grid::draw(){
 		}
 	}
 	float xyz[3];
-	Vector pos = getCellPosition(2, 1);
+	Vector pos = getCellPosition(4, 4);
 	xyz[0] = pos[0]; xyz[1] = pos[1]; xyz[2] = pos[2];
 	std::cout << pos[0] << "-" << pos[1] << "\n";
 	glPointSize(5);
@@ -68,6 +77,14 @@ void Grid::draw(){
 
 void Grid::setCell(int i, int j, CellType cType){
 	cells[i][j].cellType = cType;
+}
+
+Cell Grid::getCell(Vector pos){
+	int i = pos[0] / cellSize;
+	int j = pos[1] / cellSize;
+	int w = 0;// pos[2] / cellSize;
+
+	return cells[i][j];
 }
 
 float Grid::getHVelocityAt(int i, int j){
@@ -100,6 +117,8 @@ float Grid::getMaxVelocity(){
 }
 
 Vector Grid::interpolateVelocity(Vector position){
+
+
 	int x0 = position[0] / cellSize;
 	int x1 = x0 + 1;
 	int y0 = position[1] / cellSize;

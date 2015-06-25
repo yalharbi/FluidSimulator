@@ -9,15 +9,17 @@
 class Grid
 {
 	float cellSize, offset;
-	Cell ** cells;
+	
 	bool drawVectorField;
 
 public:
+	Cell ** cells;
 	int width, height;
 	Grid();
 	Grid(int w, int h, float cellSize);
 	void draw();
 	void setCell(int i, int j, CellType cellType);
+	Cell getCell(Vector position);
 	void showVectorField();
 	void hideVectorField();
 	float getCellSize();

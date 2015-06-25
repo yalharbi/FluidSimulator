@@ -8,6 +8,7 @@ FluidSimulator::FluidSimulator()
 FluidSimulator::FluidSimulator(int width, int height, int cellSize)
 {
 	simulationGrid = new Grid(width, height, cellSize);
+	simulationGrid->setCell(3, 4, FLUID); simulationGrid->setCell(4, 4, FLUID); simulationGrid->setCell(5, 4, FLUID);
 }
 
 void FluidSimulator::advect(float timeStep){
@@ -17,28 +18,34 @@ void FluidSimulator::advect(float timeStep){
 }
 
 void FluidSimulator::advectVelocity(){
-	Vector **updatedV = new Vector*[simulationGrid->width];
-	for (int i = 0; i < simulationGrid->width; i++)
-		updatedV[i] = new Vector[simulationGrid->height];
+	Cell ** updatedCells = new Cell*[simulationGrid->width];
+	for (int i = 0; i < simulationGrid->width; i++){
+		updatedCells[i] = new Cell[simulationGrid->height];
+	}
+
 
 
 	for (int i = 0; i < simulationGrid->width; i++){
 		for (int j = 0; j < simulationGrid->height; j++){
-			updatedV[i][j] = advectCell(i, j);
+			updatedCells[i][j] = advectCell(i, j);
 		}
 	}
+
+	simulationGrid->cells = updatedCells;
 }
 
-Vector FluidSimulator::advectCell(int i, int j){
-	if (i == 0 || j == 0 || i == simulationGrid->width || j == simulationGrid->height)
-		return Vector(0,0,0);
+Cell FluidSimulator::advectCell(int i, int j){
+	Cell cell;
+	if (i == 0 || j == 0 || i == simulationGrid->width-1 || j == simulationGrid->height-1)
+		return cell;
 	computeTimeStep();
 	Vector position = simulationGrid->getCellPosition(i, j);
 	Vector midPos = position - simulationGrid->getVelocityVector(i, j)*dt/2;
 	Vector tracedParticle = position - simulationGrid->interpolateVelocity(midPos)*dt;
 
 	std::cout << "dt: " << dt << " pos: " << position << " traced: " << tracedParticle << " vel: " << simulationGrid->interpolateVelocity(midPos) << "\n";
-	return simulationGrid->interpolateVelocity(tracedParticle);
+	//simulationGrid->interpolateVelocity(tracedParticle);
+	return simulationGrid->getCell(tracedParticle);
 }
 
 
@@ -55,7 +62,5 @@ float FluidSimulator::computeTimeStep(){
 }
 
 void FluidSimulator::draw(){
-	simulationGrid->setCell(2, 1, FLUID);
-	advectCell(2, 1);
 	simulationGrid->draw();
 }
