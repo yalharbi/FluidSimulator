@@ -19,11 +19,13 @@ Grid::Grid(int w, int h, float cSize){
 
 	for (int i = 0; i < width; i++){
 		cells[i][height - 1].v = 0;
+		cells[i][height - 1].u = 0;
 	}
 
 	for (int j = 0; j < height; j++){
 		cells[0][j].u = 0;
-		cells[width-1][j].u = 0;
+		cells[width - 1][j].u = 0;
+		cells[width - 1][j].v = 0;
 	}
 
 }
@@ -124,6 +126,9 @@ Vector Grid::interpolateVelocity(Vector position){
 	int y0 = position[1] / cellSize;
 	int y1 = y0 + 1;
 
+	if (x1 >= width - 1 || x0 <= 0 || y1 >= height - 1 || y0 <= 0)
+		return Vector(0, 0, 0);
+
 	float alpha = (position[0] - x0)/cellSize;
 	float approximateU = (1 - alpha)*getHVelocityAt(x0, y0) + (alpha)*getHVelocityAt(x1, y0);
 
@@ -136,8 +141,8 @@ Vector Grid::interpolateVelocity(Vector position){
 Vector Grid::getCellPosition(int i, int j){
 	float xyz[3];
 
-	xyz[0] = i*cellSize + cellSize / 2;
-	xyz[1] = j*cellSize + cellSize / 2;
+	xyz[0] = i*cellSize;
+	xyz[1] = j*cellSize;
 	xyz[2] = 0; //3D
 
 	return Vector(xyz[0], xyz[1], xyz[2]);

@@ -35,15 +35,16 @@ void FluidSimulator::advectVelocity(){
 }
 
 Cell FluidSimulator::advectCell(int i, int j){
-	Cell cell;
+
 	if (i == 0 || j == 0 || i == simulationGrid->width-1 || j == simulationGrid->height-1)
-		return cell;
+		return simulationGrid->cells[i][j];
+
 	computeTimeStep();
 	Vector position = simulationGrid->getCellPosition(i, j);
 	Vector midPos = position - simulationGrid->getVelocityVector(i, j)*dt/2;
 	Vector tracedParticle = position - simulationGrid->interpolateVelocity(midPos)*dt;
 
-	std::cout << "dt: " << dt << " pos: " << position << " traced: " << tracedParticle << " vel: " << simulationGrid->interpolateVelocity(midPos) << "\n";
+	//std::cout << "dt: " << dt << " pos: " << position << " traced: " << tracedParticle << " vel: " << simulationGrid->interpolateVelocity(midPos) << "\n";
 	//simulationGrid->interpolateVelocity(tracedParticle);
 	return simulationGrid->getCell(tracedParticle);
 }
