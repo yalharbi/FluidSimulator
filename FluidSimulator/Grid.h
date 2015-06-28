@@ -5,6 +5,7 @@
 #include <glut.h>
 #include <iostream>
 #include "Vector.h"
+#include <math.h>
 
 class Grid
 {
@@ -20,6 +21,7 @@ public:
 	void draw();
 	void setCell(int i, int j, CellType cellType);
 	Cell getCell(Vector position);
+	CellType getCellType(int i, int j);
 	void showVectorField();
 	void hideVectorField();
 	float getCellSize();

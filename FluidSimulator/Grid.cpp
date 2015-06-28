@@ -38,7 +38,9 @@ void Grid::draw(){
 			Cell cell = cells[i][j];
 			glBegin(GL_QUADS);
 			if (cell.cellType == FREE)
-				glColor3f(0.5,0.5,0.5);
+				glColor3f(0.5, 0.5, 0.5);
+			else if (cell.cellType == SOLID)
+				glColor3f(1, 1, 0);
 			else
 				glColor3f(0, 0, 1);
 
@@ -54,22 +56,22 @@ void Grid::draw(){
 				if (cell.u>cellSize/2) cell.u = cellSize / 2;
 				if (cell.v>cellSize/2) cell.v = cellSize / 2;
 				glVertex3f(i*cellSize + cellSize / 2 - cell.u, j*cellSize + cellSize / 2 - cell.v, 0);
-				glVertex3f(i*cellSize + cellSize / 2 + cell.u/2,  j*cellSize  + cellSize / 2 + cell.v/2, 0);
+				glVertex3f(i*cellSize + cellSize / 2 + getHVelocityAt(i, j) / 2, j*cellSize + cellSize / 2 + getVVelocityAt(i, j) / 2, 0);
 				glEnd();
 
 				glPointSize(2);
 				glBegin(GL_POINTS);
-				glColor3f(1, 1, 0);
-				glVertex3f(i*cellSize + cellSize / 2 + cell.u / 2, j*cellSize + cellSize / 2 + cell.v / 2, 0);
+				glColor3f(0.75, 0.75, 0);
+				glVertex3f(i*cellSize + cellSize / 2 + getHVelocityAt(i, j) / 2, j*cellSize + cellSize / 2 + getVVelocityAt(i, j) / 2, 0);
 				glEnd();
 
 			}
 		}
 	}
 	float xyz[3];
-	Vector pos = getCellPosition(4, 4);
-	xyz[0] = pos[0]; xyz[1] = pos[1]; xyz[2] = pos[2];
-	std::cout << pos[0] << "-" << pos[1] << "\n";
+	Vector pos = getCellPosition(4, 2);
+	xyz[0] = pos[0] + cellSize/2; xyz[1] = pos[1] + cellSize/2; xyz[2] = pos[2];
+	//std::cout << pos[0] << "-" << pos[1] << "\n";
 	glPointSize(5);
 	glBegin(GL_POINTS);
 	glColor3f(1, 1, 1);
@@ -89,16 +91,26 @@ Cell Grid::getCell(Vector pos){
 	return cells[i][j];
 }
 
+CellType Grid::getCellType(int i, int j){
+	return cells[i][j].cellType;
+}
+
 float Grid::getHVelocityAt(int i, int j){
-	return cells[i][j].u;
+	if (i == width - 1)
+		return cells[i][j].u;
+	float centerHVelocity = (cells[i][j].u + cells[i+1][j].u)/2;
+	return centerHVelocity;
 }
 
 float Grid::getVVelocityAt(int i, int j){
-	return cells[i][j].v;
+	if (j == height - 1)
+		return cells[i][j].v;
+	float centerVVelocity = (cells[i][j].v + cells[i][j +1].v) / 2;
+	return centerVVelocity;
 }
 
 Vector Grid::getVelocityVector(int i, int j){
-	return Vector(cells[i][j].u, cells[i][j].v, 0);
+	return Vector(getHVelocityAt(i,j), getVVelocityAt(i,j), 0);
 }
 
 void Grid::showVectorField(){
@@ -115,7 +127,16 @@ float Grid::getCellSize(){
 
 float Grid::getMaxVelocity(){
 	// TODO
-	return 9.8;
+	float max = 9.8*10;
+	/*for (int i = 0; i < width-1; i++){
+		for (int j = 0; j < height-1; j++){
+			if (abs(getHVelocityAt(i, j)) > max)
+				max = abs(getHVelocityAt(i, j));
+			if (abs(getVVelocityAt(i, j)) > max)
+				max = abs(getVVelocityAt(i, j));
+		}
+	}*/
+	return max;
 }
 
 Vector Grid::interpolateVelocity(Vector position){
@@ -124,7 +145,7 @@ Vector Grid::interpolateVelocity(Vector position){
 	int x0 = position[0] / cellSize;
 	int x1 = x0 + 1;
 	int y0 = position[1] / cellSize;
-	int y1 = y0 + 1;
+	int y1 = y0 - 1;
 
 	if (x1 >= width - 1 || x0 <= 0 || y1 >= height - 1 || y0 <= 0)
 		return Vector(0, 0, 0);
@@ -141,8 +162,8 @@ Vector Grid::interpolateVelocity(Vector position){
 Vector Grid::getCellPosition(int i, int j){
 	float xyz[3];
 
-	xyz[0] = i*cellSize;
-	xyz[1] = j*cellSize;
+	xyz[0] = i*cellSize +cellSize / 2;
+	xyz[1] = j*cellSize +cellSize / 2;
 	xyz[2] = 0; //3D
 
 	return Vector(xyz[0], xyz[1], xyz[2]);
