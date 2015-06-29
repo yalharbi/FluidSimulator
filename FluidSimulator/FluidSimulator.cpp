@@ -54,7 +54,7 @@ void FluidSimulator::advectVelocity(){
 	}
 
 	simulationGrid->cells = updatedCells;
-	std::cout << simulationGrid->getVelocityVector(4, 4);
+	//std::cout << simulationGrid->getVelocityVector(4, 2);
 }
 
 void FluidSimulator::addForces(int i, int j){
@@ -63,7 +63,7 @@ void FluidSimulator::addForces(int i, int j){
 	}
 
 	if (simulationGrid->getCellType(i, j) == FREE && simulationGrid->getCellType(i, j+1) == FLUID){
-		simulationGrid->cells[i][j].v += dt*(-9.8)/2;
+		simulationGrid->cells[i][j].v += simulationGrid->getVVelocityAt(i, j+1);
 
 	}
 }
@@ -77,8 +77,9 @@ Cell FluidSimulator::advectCell(int i, int j){
 	Vector midPos = position - simulationGrid->getVelocityVector(i, j)*dt/2;
 	Vector tracedParticle = position - simulationGrid->interpolateVelocity(midPos)*dt;
 	if (i == 4 && j == 4){
-		std::cout << "dt: " << dt << " pos: " << position << " traced: " << tracedParticle << " vel: " << simulationGrid->interpolateVelocity(midPos) << "\n";
-		simulationGrid->getCell(tracedParticle).v;
+		std::cout << "midpos: " << midPos;
+		std::cout << "dt: " << dt << " pos: " << position << " traced: " << tracedParticle << " vel: " << simulationGrid->interpolateVelocity(midPos) << "size: " << simulationGrid->getCellSize() << "\n";
+		std::cout << "tr: " << simulationGrid->getCell(tracedParticle).v << "\n";
 	}
 	simulationGrid->interpolateVelocity(tracedParticle);
 	return simulationGrid->getCell(tracedParticle);

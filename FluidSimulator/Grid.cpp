@@ -96,14 +96,14 @@ CellType Grid::getCellType(int i, int j){
 }
 
 float Grid::getHVelocityAt(int i, int j){
-	if (i == width - 1)
+	//if (i == width - 1)
 		return cells[i][j].u;
 	float centerHVelocity = (cells[i][j].u + cells[i+1][j].u)/2;
 	return centerHVelocity;
 }
 
 float Grid::getVVelocityAt(int i, int j){
-	if (j == height - 1)
+	//if (j == height - 1)
 		return cells[i][j].v;
 	float centerVVelocity = (cells[i][j].v + cells[i][j +1].v) / 2;
 	return centerVVelocity;
@@ -145,17 +145,18 @@ Vector Grid::interpolateVelocity(Vector position){
 	int x0 = position[0] / cellSize;
 	int x1 = x0 + 1;
 	int y0 = position[1] / cellSize;
-	int y1 = y0 - 1;
+	int y1 = y0 + 1;
 
 	if (x1 >= width - 1 || x0 <= 0 || y1 >= height - 1 || y0 <= 0)
 		return Vector(0, 0, 0);
 
-	float alpha = (position[0] - x0)/cellSize;
+	float alpha = (position[0] - x0*cellSize)/cellSize;
 	float approximateU = (1 - alpha)*getHVelocityAt(x0, y0) + (alpha)*getHVelocityAt(x1, y0);
 
-	float beta = (position[1] - y0) / cellSize;
+	float beta = (position[1] - y0*cellSize) / cellSize;
 	float approximateV = (1 - beta)*getVVelocityAt(x0, y0) + (beta)*getVVelocityAt(x0, y1);
 
+	return getVelocityVector(x0, y0);
 	return Vector(approximateU, approximateV, 0);
 }
 
