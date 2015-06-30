@@ -7,7 +7,7 @@ class Cell{
 
 
 public:
-	float u, v, p;
+	float u, v, p, density;
 	CellType cellType;
 	Cell();
 	Cell(CellType type, float u0, float v0, float p0);

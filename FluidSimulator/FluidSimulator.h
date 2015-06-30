@@ -8,6 +8,8 @@ class FluidSimulator
 	void advectVelocity();
 	void advectPressure();
 	void addForces(int i, int j);
+	Vector * calculateNegativeDivergence();
+	void project();
 	float * approximateVelocity(float * pos);
 	float dt;
 

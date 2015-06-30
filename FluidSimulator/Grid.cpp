@@ -7,6 +7,7 @@ Grid::Grid()
 
 
 Grid::Grid(int w, int h, float cSize){
+	fluidCellCount = 0;
 	width = w/cSize;
 	height = h/cSize;
 	cellSize = cSize;
@@ -55,8 +56,8 @@ void Grid::draw(){
 				glColor3f(1, 1, 1);
 				if (cell.u>cellSize/2) cell.u = cellSize / 2;
 				if (cell.v>cellSize/2) cell.v = cellSize / 2;
-				glVertex3f(i*cellSize + cellSize / 2 - cell.u, j*cellSize + cellSize / 2 - cell.v, 0);
-				glVertex3f(i*cellSize + cellSize / 2 + getHVelocityAt(i, j) / 2, j*cellSize + cellSize / 2 + getVVelocityAt(i, j) / 2, 0);
+				glVertex3f(i*cellSize + cellSize / 2 - +getHVelocityAt(i, j) / 2, j*cellSize - getVVelocityAt(i, j) / 2, 0);
+				glVertex3f(i*cellSize + cellSize / 2 + getHVelocityAt(i, j) / 2, j*cellSize + getVVelocityAt(i, j) / 2, 0);
 				glEnd();
 
 				glPointSize(2);
@@ -80,7 +81,9 @@ void Grid::draw(){
 }
 
 void Grid::setCell(int i, int j, CellType cType){
-	cells[i][j].cellType = cType;
+	cells[i][j].setType(cType);
+	if (cType == FLUID)
+		fluidCellCount++;
 }
 
 Cell Grid::getCell(Vector pos){
@@ -127,7 +130,7 @@ float Grid::getCellSize(){
 
 float Grid::getMaxVelocity(){
 	// TODO
-	float max = 9.8*10;
+	float max = 9.8*50;
 	/*for (int i = 0; i < width-1; i++){
 		for (int j = 0; j < height-1; j++){
 			if (abs(getHVelocityAt(i, j)) > max)

@@ -59,11 +59,11 @@ void FluidSimulator::advectVelocity(){
 
 void FluidSimulator::addForces(int i, int j){
 	if (simulationGrid->getCellType(i, j) == FLUID){
-		simulationGrid->cells[i][j].v += dt*(-9.8);
+		simulationGrid->cells[i][j].v += (-9.8);
 	}
 
-	if (simulationGrid->getCellType(i, j) == FREE && simulationGrid->getCellType(i, j+1) == FLUID){
-		simulationGrid->cells[i][j].v += simulationGrid->getVVelocityAt(i, j+1);
+	if (simulationGrid->getCellType(i, j) == FREE && simulationGrid->getCellType(i, j-1) == FLUID){
+		simulationGrid->cells[i][j].v += (-9.8);
 
 	}
 }
@@ -90,14 +90,43 @@ void FluidSimulator::advectPressure(){
 
 }
 
+Vector * FluidSimulator::calculateNegativeDivergence(){
+	Vector * rhs = (Vector *)malloc(sizeof(Vector) * simulationGrid->fluidCellCount);
+	int place = 0;
+	float scale = 1;// / simulationGrid->getCellSize();
+
+	for (int i = 0; i < simulationGrid->width; i++){
+		for (int j = 0; j < simulationGrid->height; j++){
+			if (simulationGrid->getCellType(i, j) != FLUID)
+				continue;
+			Cell cell = simulationGrid->cells[i][j];
+			rhs[place++] = Vector(simulationGrid->getHVelocityAt(i, j) - simulationGrid->getHVelocityAt(i + 1, j),
+				simulationGrid->getVVelocityAt(i, j) - simulationGrid->getVVelocityAt(i, j+1), 0) *  -scale;
+			std::cout << rhs[place - 1] << "\n";
+		}
+	}
+	return rhs;
+}
+
+void FluidSimulator::project(){
+	Vector * rhs = calculateNegativeDivergence();
+}
+
 float FluidSimulator::computeTimeStep(){
 	float cellSize = simulationGrid->getCellSize();
 	float maxVel = simulationGrid->getMaxVelocity();
 
 	dt = cellSize / maxVel;
+	dt = 1;
 	return dt;
 }
 
 void FluidSimulator::draw(){
 	simulationGrid->draw();
+}
+
+void FluidSimulator::simulateAndDraw(){
+	advect(9.8);
+	project();
+	draw();
 }

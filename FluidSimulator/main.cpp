@@ -17,9 +17,9 @@ void display(){
 	simulator->draw();
 
 	time++;
-	if (time >= 100){
-		simulator->advect(simulator->computeTimeStep());
-		time = 0;
+	if (time == 1){
+		simulator->simulateAndDraw();
+		//time = 0;
 	}
 
 

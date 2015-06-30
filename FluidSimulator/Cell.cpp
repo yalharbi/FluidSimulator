@@ -5,6 +5,7 @@ Cell::Cell(){
 	u = 0;
 	v = 0;
 	p = 0;
+	density = 0;
 }
 
 Cell::Cell(CellType cType, float u0, float v0, float p0){
@@ -25,4 +26,6 @@ void Cell::setPressure(float pUpdated){
 
 void Cell::setType(CellType cType){
 	cellType = cType;
+	if (cType == FLUID)
+		density = 1000;
 }

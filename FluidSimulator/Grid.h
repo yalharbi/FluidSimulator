@@ -14,6 +14,7 @@ class Grid
 	bool drawVectorField;
 
 public:
+	int fluidCellCount;
 	Cell ** cells;
 	int width, height;
 	Grid();
