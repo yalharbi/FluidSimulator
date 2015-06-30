@@ -1,6 +1,6 @@
 #pragma once
 #include "Grid.h"
-
+#include <map>
 class FluidSimulator
 {
 	Grid* simulationGrid;
@@ -8,7 +8,7 @@ class FluidSimulator
 	void advectVelocity();
 	void advectPressure();
 	void addForces(int i, int j);
-	Vector * calculateNegativeDivergence();
+	float * calculateNegativeDivergence();
 	void project();
 	float * approximateVelocity(float * pos);
 	float dt;

@@ -17,9 +17,9 @@ void display(){
 	simulator->draw();
 
 	time++;
-	if (time == 1){
+	if (time==100){
 		simulator->simulateAndDraw();
-		//time = 0;
+		time = 0;
 	}
 
 

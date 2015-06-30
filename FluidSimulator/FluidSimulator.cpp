@@ -1,5 +1,5 @@
 #include "FluidSimulator.h"
-
+#define DENSITY 1000
 /* LOG
 6/28/2015: According to (Foster and Fedkiw 2001) air cells only have velocity at their boundaries with fluid cells, also (Bridson 2008) p24
 		   this means u(i,j) is actually the average of the two boundaries, otherwise fluids won't flow into air cells whos velocity is 0 (because we can't trace them back)
@@ -14,6 +14,7 @@ FluidSimulator::FluidSimulator()
 FluidSimulator::FluidSimulator(int width, int height, int cellSize)
 {
 	simulationGrid = new Grid(width, height, cellSize);
+	simulationGrid->setCell(3, 5, FLUID); simulationGrid->setCell(4, 5, FLUID); simulationGrid->setCell(5, 5, FLUID);
 	simulationGrid->setCell(3, 4, FLUID); simulationGrid->setCell(4, 4, FLUID); simulationGrid->setCell(5, 4, FLUID);
 	simulationGrid->setCell(3, 3, FLUID); simulationGrid->setCell(4, 3, FLUID); simulationGrid->setCell(5, 3, FLUID);
 	for (int i = 0; i < simulationGrid->width; i++)
@@ -59,13 +60,13 @@ void FluidSimulator::advectVelocity(){
 
 void FluidSimulator::addForces(int i, int j){
 	if (simulationGrid->getCellType(i, j) == FLUID){
-		simulationGrid->cells[i][j].v += (-9.8);
+		simulationGrid->cells[i][j].v += (-9.8)*dt;
 	}
 
-	if (simulationGrid->getCellType(i, j) == FREE && simulationGrid->getCellType(i, j-1) == FLUID){
+	/*if (simulationGrid->getCellType(i, j) == FREE && simulationGrid->getCellType(i, j-1) == FLUID){
 		simulationGrid->cells[i][j].v += (-9.8);
 
-	}
+	}*/
 }
 
 Cell FluidSimulator::advectCell(int i, int j){
@@ -73,10 +74,11 @@ Cell FluidSimulator::advectCell(int i, int j){
 	if (simulationGrid->cells[i][j].cellType == SOLID)
 		return simulationGrid->cells[i][j];
 
+
 	Vector position = simulationGrid->getCellPosition(i, j);
 	Vector midPos = position - simulationGrid->getVelocityVector(i, j)*dt/2;
 	Vector tracedParticle = position - simulationGrid->interpolateVelocity(midPos)*dt;
-	if (i == 4 && j == 4){
+	if ((i == 4 && j == 4) || (i == 4 && j == 2)){
 		std::cout << "midpos: " << midPos;
 		std::cout << "dt: " << dt << " pos: " << position << " traced: " << tracedParticle << " vel: " << simulationGrid->interpolateVelocity(midPos) << "size: " << simulationGrid->getCellSize() << "\n";
 		std::cout << "tr: " << simulationGrid->getCell(tracedParticle).v << "\n";
@@ -90,26 +92,88 @@ void FluidSimulator::advectPressure(){
 
 }
 
-Vector * FluidSimulator::calculateNegativeDivergence(){
-	Vector * rhs = (Vector *)malloc(sizeof(Vector) * simulationGrid->fluidCellCount);
+float * FluidSimulator::calculateNegativeDivergence(){
+	float* rhs = new float[simulationGrid->fluidCellCount];// (float *)malloc(sizeof(float) * simulationGrid->fluidCellCount);
 	int place = 0;
 	float scale = 1;// / simulationGrid->getCellSize();
+	std::map<std::pair<int, int>, int> indices;
 
 	for (int i = 0; i < simulationGrid->width; i++){
 		for (int j = 0; j < simulationGrid->height; j++){
 			if (simulationGrid->getCellType(i, j) != FLUID)
 				continue;
 			Cell cell = simulationGrid->cells[i][j];
-			rhs[place++] = Vector(simulationGrid->getHVelocityAt(i, j) - simulationGrid->getHVelocityAt(i + 1, j),
-				simulationGrid->getVVelocityAt(i, j) - simulationGrid->getVVelocityAt(i, j+1), 0) *  -scale;
+			rhs[place++] = (simulationGrid->getHVelocityAt(i, j) - simulationGrid->getHVelocityAt(i + 1, j) +
+				simulationGrid->getVVelocityAt(i, j) - simulationGrid->getVVelocityAt(i, j+1) + 0) *  -scale;
+			indices.insert(std::make_pair(std::make_pair(i, j), place - 1));
+
 			std::cout << rhs[place - 1] << "\n";
+		}
+	}
+
+	for (int i = 0; i < simulationGrid->width; i++){
+		for (int j = 0; j < simulationGrid->height; j++){
+			if (simulationGrid->getCellType(i, j) != FLUID)
+				continue;
+			Cell cell = simulationGrid->cells[i][j];
+			int place = indices[std::make_pair(i, j)];
+			if (simulationGrid->getCellType(i, j + 1) == SOLID){
+				rhs[place] = rhs[place] + simulationGrid->getVVelocityAt(i, j+1)*scale;
+			}
+			if (simulationGrid->getCellType(i, j - 1) == SOLID){
+				rhs[place] = rhs[place] - simulationGrid->getVVelocityAt(i, j + 1)*scale;
+			}
+			if (simulationGrid->getCellType(i+1, j) == SOLID){
+				rhs[place] = rhs[place] + simulationGrid->getVVelocityAt(i+1, j )*scale;
+			}
+			if (simulationGrid->getCellType(i - 1, j) == SOLID){
+				rhs[place] = rhs[place] - simulationGrid->getVVelocityAt(i, j)*scale;
+			}
+
+			std::cout << "^" << rhs[place] << "\n";
 		}
 	}
 	return rhs;
 }
 
 void FluidSimulator::project(){
-	Vector * rhs = calculateNegativeDivergence();
+	std::map<std::pair<int, int>, int> indices;
+	int index = 0;
+	for (int i = 0; i < simulationGrid->width; i++){
+		for (int j = 0; j < simulationGrid->height; j++){
+			if (simulationGrid->getCellType(i, j) == FLUID)
+				indices.insert(std::make_pair(std::make_pair(i, j), index++));
+		}
+	}
+
+
+	float * rhs = calculateNegativeDivergence();
+	float * Adiag = new float[simulationGrid->fluidCellCount]();
+	float * Aplusi = new float[simulationGrid->fluidCellCount]();
+
+	float scale = dt / (DENSITY*simulationGrid->getCellSize());
+	for (int i = 0; i < simulationGrid->width; i++){
+		for (int j = 0; j < simulationGrid->height; j++){
+			int place = indices[std::make_pair(i, j)];
+			if (simulationGrid->getCellType(i, j) == FLUID && simulationGrid->getCellType(i + 1, j) == FLUID){
+				Adiag[place] += scale;
+				Adiag[indices[std::make_pair(i + 1, j)]] += scale;
+				Aplusi[place] = -scale;
+			}
+			else if (simulationGrid->getCellType(i, j) == FLUID && simulationGrid->getCellType(i + 1, j) == FREE)
+				Adiag[place];
+
+			if (simulationGrid->getCellType(i, j) == FLUID && simulationGrid->getCellType(i, j+1) == FLUID){
+				Adiag[place] += scale;
+				Adiag[indices[std::make_pair(i, j+1)]] += scale;
+				Aplusi[place] = -scale;
+			}
+			else if (simulationGrid->getCellType(i, j) == FLUID && simulationGrid->getCellType(i, j+1) == FREE)
+				Adiag[place];
+
+			
+		}
+	}
 }
 
 float FluidSimulator::computeTimeStep(){
