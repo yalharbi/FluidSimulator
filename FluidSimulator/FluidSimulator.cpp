@@ -1,5 +1,6 @@
 #include "FluidSimulator.h"
 #define DENSITY 1000
+#define square(x) x*x
 /* LOG
 6/28/2015: According to (Foster and Fedkiw 2001) air cells only have velocity at their boundaries with fluid cells, also (Bridson 2008) p24
 		   this means u(i,j) is actually the average of the two boundaries, otherwise fluids won't flow into air cells whos velocity is 0 (because we can't trace them back)
@@ -136,6 +137,40 @@ float * FluidSimulator::calculateNegativeDivergence(){
 	return rhs;
 }
 
+float * FluidSimulator::applyPreconditioner(float * Adiag, float * Aplusi, float * Aplusj, float * precon, float * r, std::map<std::pair<int, int>, int> indices){
+	float * q = new float[simulationGrid->fluidCellCount]();
+
+	for (int i = 1; i < simulationGrid->width; i++){ //Lq=r
+		for (int j = 1; j < simulationGrid->height; j++){
+			int place = indices[std::make_pair(i, j)];
+			int placepj = indices[std::make_pair(i, j - 1)];
+			int placepi = indices[std::make_pair(i - 1, j)];
+
+			if (simulationGrid->getCellType(i, j) == FLUID){
+				float t = r[place] - Aplusi[placepi] * precon[placepi] * q[placepi]
+					- Aplusj[placepj] * precon[placepj] * q[placepj];
+				q[place] = t*precon[place];
+			}
+		}
+	}
+
+	float * z = new float[simulationGrid->fluidCellCount]();
+	for (int i = simulationGrid->width; i > 0; i--){ //Ltz = q
+		for (int j = simulationGrid->height; j > 0; j--){
+			int place = indices[std::make_pair(i, j)];
+			int placenj = indices[std::make_pair(i, j + 1)];
+			int placeni = indices[std::make_pair(i + 1, j)];
+
+			if (simulationGrid->getCellType(i, j) == FLUID){
+				float t = q[place] - Aplusi[place] * precon[place] * z[placeni]
+					- Aplusj[place] * precon[place] * z[placenj];
+				z[place] = t*precon[place];
+			}
+		}
+	}
+	return z;
+}
+
 void FluidSimulator::project(){
 	std::map<std::pair<int, int>, int> indices;
 	int index = 0;
@@ -150,9 +185,11 @@ void FluidSimulator::project(){
 	float * rhs = calculateNegativeDivergence();
 	float * Adiag = new float[simulationGrid->fluidCellCount]();
 	float * Aplusi = new float[simulationGrid->fluidCellCount]();
+	float * precon = new float[simulationGrid->fluidCellCount]();
+	float * Aplusj = new float[simulationGrid->fluidCellCount]();
 
 	float scale = dt / (DENSITY*simulationGrid->getCellSize());
-	for (int i = 0; i < simulationGrid->width; i++){
+	for (int i = 0; i < simulationGrid->width; i++){ //compute A... where A*pressure(unknown) = negative divergence... pressure makes the field divergent free
 		for (int j = 0; j < simulationGrid->height; j++){
 			int place = indices[std::make_pair(i, j)];
 			if (simulationGrid->getCellType(i, j) == FLUID && simulationGrid->getCellType(i + 1, j) == FLUID){
@@ -166,7 +203,7 @@ void FluidSimulator::project(){
 			if (simulationGrid->getCellType(i, j) == FLUID && simulationGrid->getCellType(i, j+1) == FLUID){
 				Adiag[place] += scale;
 				Adiag[indices[std::make_pair(i, j+1)]] += scale;
-				Aplusi[place] = -scale;
+				Aplusj[place] = -scale;
 			}
 			else if (simulationGrid->getCellType(i, j) == FLUID && simulationGrid->getCellType(i, j+1) == FREE)
 				Adiag[place];
@@ -174,6 +211,27 @@ void FluidSimulator::project(){
 			
 		}
 	}
+	float tau = 0.97, beta = 0.25;
+	for (int i = 1; i < simulationGrid->width; i++){ //compute preconditioner... initial guess for solving the system
+		for (int j = 1; j < simulationGrid->height; j++){
+			int place = indices[std::make_pair(i, j)];
+			int placepj = indices[std::make_pair(i, j-1)];
+			int placepi = indices[std::make_pair(i-1, j)];
+
+			if (simulationGrid->getCellType(i, j) == FLUID){
+				float e = Adiag[place] - square(Aplusi[placepi] * precon[placepi]) - square(Aplusj[placepj] * precon[placepj])
+					- tau*(Aplusi[placepi] * Aplusj[placepi]* square(precon[placepi])
+					+ Aplusj[placepj] * Aplusi[placepj] * square(precon[placepj]));
+				if (e < beta * Adiag[place])
+					e = Adiag[place];
+				precon[place] = 1 / sqrt(e);
+			}
+		}
+	}
+
+
+
+
 }
 
 float FluidSimulator::computeTimeStep(){

@@ -12,6 +12,7 @@ class FluidSimulator
 	void project();
 	float * approximateVelocity(float * pos);
 	float dt;
+	float * applyPreconditioner(float * Adiag, float * Aplusi, float * Aplusj, float * precon, float * r, std::map<std::pair<int, int>, int> indices);
 
 public:
 	FluidSimulator();
