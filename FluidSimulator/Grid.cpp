@@ -54,10 +54,10 @@ void Grid::draw(){
 			if (drawVectorField){
 				glBegin(GL_LINES);
 				glColor3f(1, 1, 1);
-				if (cell.u>cellSize/2) cell.u = cellSize / 2;
-				if (cell.v>cellSize/2) cell.v = cellSize / 2;
-				glVertex3f(i*cellSize + cellSize / 2 - +getHVelocityAt(i, j) / 2, j*cellSize - getVVelocityAt(i, j) / 2, 0);
-				glVertex3f(i*cellSize + cellSize / 2 + getHVelocityAt(i, j) / 2, j*cellSize + getVVelocityAt(i, j) / 2, 0);
+				Vector vv = getVelocityVector(i, j);
+				vv = vv.normalize();
+				glVertex3f(i*cellSize + cellSize / 2, j*cellSize + cellSize / 2, 0);
+				glVertex3f(i*cellSize + cellSize / 2 + vv[0]*10, j*cellSize + cellSize / 2 + vv[1]*10, 0);
 				glEnd();
 
 				glPointSize(2);
@@ -130,7 +130,7 @@ float Grid::getCellSize(){
 
 float Grid::getMaxVelocity(){
 	// TODO
-	float max = 9.8*50;
+	float max = 9.8*10;
 	/*for (int i = 0; i < width-1; i++){
 		for (int j = 0; j < height-1; j++){
 			if (abs(getHVelocityAt(i, j)) > max)

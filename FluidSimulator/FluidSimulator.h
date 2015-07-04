@@ -13,7 +13,7 @@ class FluidSimulator
 	float * approximateVelocity(float * pos);
 	float dt;
 	float * applyPreconditioner(float * Adiag, float * Aplusi, float * Aplusj, float * precon, float * r, std::map<std::pair<int, int>, int> indices);
-
+	float * FluidSimulator::apply(float * Adiag, float * Aplusi, float * Aplusj, float * Aprevi, float * Aprevj, float * x, int length, std::map<std::pair<int, int>, int> indices);
 public:
 	FluidSimulator();
 	FluidSimulator(int width, int height, int cellSize);
