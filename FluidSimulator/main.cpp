@@ -16,11 +16,11 @@ void display(){
 
 	simulator->draw();
 
-	/*time++;
-	if (time==100){*/
+	time++;
+	if (time==100){
 		simulator->simulateAndDraw();
-		/*time = 0;
-	}*/
+		time = 0;
+	}
 
 
 

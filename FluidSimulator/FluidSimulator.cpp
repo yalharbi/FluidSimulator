@@ -1,7 +1,7 @@
 #include "FluidSimulator.h"
-#define DENSITY 1000
+#define DENSITY 1
 #define MAX_ITERATIONS 1000
-#define TOLERANCE 1/1000000
+#define TOLERANCE 1/10000
 
 #define square(x) x*x
 
@@ -9,8 +9,8 @@ inline float dotproduct(float * a, float * b, int length){
 	float result = 0;
 	for (int it = 0; it < length; it++)
 		result += a[it] * b[it];
-	if (result <0.001)
-		return 0.001;
+	if (result < 0.001)
+		0;
 	return result;
 }
 
@@ -100,19 +100,20 @@ void FluidSimulator::advectVelocity(){
 
 
 	computeTimeStep();
-	for (int i = 0; i < simulationGrid->width; i++){
-		for (int j = 1; j < simulationGrid->height; j++){
-			addForces(i, j);
-		}
-	}
 
 	for (int i = 0; i < simulationGrid->width; i++){
 		for (int j = 0; j < simulationGrid->height; j++){
 			updatedCells[i][j] = advectCell(i, j);
 		}
 	}
-
 	simulationGrid->cells = updatedCells;
+	for (int i = 0; i < simulationGrid->width; i++){
+		for (int j = 1; j < simulationGrid->height; j++){
+			addForces(i, j);
+		}
+	}
+
+	
 	//std::cout << simulationGrid->getVelocityVector(4, 2);
 }
 
@@ -121,10 +122,6 @@ void FluidSimulator::addForces(int i, int j){
 		simulationGrid->cells[i][j].v += (-9.8)*dt;
 	}
 
-	/*if (simulationGrid->getCellType(i, j) == FREE && simulationGrid->getCellType(i, j-1) == FLUID){
-		simulationGrid->cells[i][j].v += (-9.8)*dt;
-
-	}*/
 }
 
 Cell FluidSimulator::advectCell(int i, int j){
@@ -138,7 +135,7 @@ Cell FluidSimulator::advectCell(int i, int j){
 	Vector tracedParticle = position - simulationGrid->interpolateVelocity(midPos)*dt;
 	if ((i == 2 && j == 1) || (i == 4 && j == 2)){
 		std::cout << "midpos: " << midPos;
-		std::cout << "dt: " << dt << " pos: " << position << " traced: " << tracedParticle << " vel: " << simulationGrid->interpolateVelocity(midPos) << "size: " << simulationGrid->getCellSize() << "\n";
+		std::cout << "dt: " << dt << " pos: " << position << " traced: " << tracedParticle << " vel: " << simulationGrid->getVelocityVector(i, j) << "size: " << simulationGrid->getCellSize() << "\n";
 		std::cout << "tr: " << simulationGrid->getCell(tracedParticle).v << "\n";
 	}
 	simulationGrid->interpolateVelocity(tracedParticle);
@@ -290,12 +287,12 @@ void FluidSimulator::project(){
 
 			if (simulationGrid->getCellType(i, j) == FLUID){
 				float e = Adiag[place] - square(Aplusi[placepi] * precon[placepi]) - square(Aplusj[placepj] * precon[placepj])
-					- tau*(Aplusi[placepi] * Aplusj[placepi] *square(precon[placepi])
-					+ Aplusj[placepj] * Aplusi[placepj]  *square(precon[placepj]));
+					- tau*(Aplusi[placepi]  *square(precon[placepi])
+					+ Aplusj[placepj]  *square(precon[placepj]));
 				if (e < beta * Adiag[place])
 					e = Adiag[place];
-				if (e == 0)
-					e = 0.1;
+				if (e < beta*Adiag[place])
+					e = Adiag[place];
 				precon[place] = 1 / sqrt(e);
 			}
 		}
@@ -307,16 +304,18 @@ void FluidSimulator::project(){
 	float * s = copyV(z, simulationGrid->fluidCellCount);
 
 	float dp = dotproduct(z, r, simulationGrid->fluidCellCount);
-
 	bool done = false;
 
 	int iterations = 0;
 	while (!done && iterations < MAX_ITERATIONS){
 		z = apply(Adiag, Aplusi, Aplusj, Aprevi, Aprevj, s, simulationGrid->fluidCellCount, indices);
-		float alph = dp / dotproduct(z, s, simulationGrid->fluidCellCount);
+		float den = dotproduct(z, s, simulationGrid->fluidCellCount);
+		if (den == 0)
+			break;
+		float alph = dp /den ;
 
 		float maxR = 0;
-	//	std::cout << "s0" << s[0];
+		//std::cout << "s0" << s[0];
 		for (int i = 0; i < simulationGrid->fluidCellCount; i++){
 			p[i] = p[i] + alph*s[i];
 			r[i] = r[i] - alph*z[i];
@@ -325,12 +324,14 @@ void FluidSimulator::project(){
 		}
 		if (abs(maxR) <= TOLERANCE){
 			done = true;
-			continue;
+			std::cout << "MX" << maxR << "#";
+			break;
 		}
 		z = applyPreconditioner(Adiag, Aplusi, Aplusj, precon, r, indices);
 		float dpNew = dotproduct(z, r, simulationGrid->fluidCellCount);
+		if (dpNew == 0) break;
 		float beeta = dpNew / dp;
-	//	std::cout << "beeta" << beeta << "dp" << dp << "dpnew" << dpNew;
+		//std::cout << "beeta" << beeta << "dp" << dp << "dpnew" << dpNew;
 		for (int i = 0; i < simulationGrid->fluidCellCount; i++)
 			s[i] = z[i] + beeta*s[i];
 		dp = dpNew;
@@ -392,5 +393,6 @@ void FluidSimulator::draw(){
 void FluidSimulator::simulateAndDraw(){
 	project();
 	advect(9.8);
+
 	draw();
 }
