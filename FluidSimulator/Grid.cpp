@@ -63,7 +63,7 @@ void Grid::draw(){
 				glPointSize(2);
 				glBegin(GL_POINTS);
 				glColor3f(0.75, 0.75, 0);
-				glVertex3f(i*cellSize + cellSize / 2 + getHVelocityAt(i, j) / 2, j*cellSize + cellSize / 2 + getVVelocityAt(i, j) / 2, 0);
+				glVertex3f(i*cellSize + cellSize / 2 + vv[0]*10, j*cellSize + cellSize / 2 + vv[1]*10, 0);
 				glEnd();
 
 			}
@@ -131,14 +131,14 @@ float Grid::getCellSize(){
 float Grid::getMaxVelocity(){
 	// TODO
 	float max = 9.8*10;
-	/*for (int i = 0; i < width-1; i++){
+	for (int i = 0; i < width-1; i++){
 		for (int j = 0; j < height-1; j++){
 			if (abs(getHVelocityAt(i, j)) > max)
 				max = abs(getHVelocityAt(i, j));
 			if (abs(getVVelocityAt(i, j)) > max)
 				max = abs(getVVelocityAt(i, j));
 		}
-	}*/
+	}
 	return max;
 }
 

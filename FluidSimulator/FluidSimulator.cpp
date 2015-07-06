@@ -69,10 +69,9 @@ FluidSimulator::FluidSimulator()
 FluidSimulator::FluidSimulator(int width, int height, int cellSize)
 {
 	simulationGrid = new Grid(width, height, cellSize);
-	/*for (int i = 5; i < 10; i++)
-		for (int j = 5; j < 10; j++)
+/*	for (int i = 5; i < 15; i++)
+		for (int j = 5; j < 15; j++)
 			simulationGrid->setCell(i, j, FLUID);*/
-	
 	simulationGrid->setCell(3, 5, FLUID); simulationGrid->setCell(4, 5, FLUID); simulationGrid->setCell(5, 5, FLUID);
 	simulationGrid->setCell(3, 4, FLUID); simulationGrid->setCell(4, 4, FLUID); simulationGrid->setCell(5, 4, FLUID);
 	simulationGrid->setCell(3, 3, FLUID); simulationGrid->setCell(4, 3, FLUID); simulationGrid->setCell(5, 3, FLUID);
@@ -382,7 +381,7 @@ float FluidSimulator::computeTimeStep(){
 	float maxVel = simulationGrid->getMaxVelocity();
 
 	dt = cellSize / maxVel;
-	dt = 0.5;
+	//dt = 0.5;
 	return dt;
 }
 
