@@ -32,5 +32,6 @@ public:
 	float getVVelocityAt(int i, int j);
 	Vector getVelocityVector(int i, int j);
 	Vector interpolateVelocity(Vector position);
+	int getFluidCellCount();
 };
 

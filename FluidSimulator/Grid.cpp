@@ -130,16 +130,18 @@ float Grid::getCellSize(){
 
 float Grid::getMaxVelocity(){
 	// TODO
-	float max = 9.8*10;
+	float max = 0;
 	for (int i = 0; i < width-1; i++){
 		for (int j = 0; j < height-1; j++){
+			if (getCellType(i, j) != FLUID) continue;
 			if (abs(getHVelocityAt(i, j)) > max)
 				max = abs(getHVelocityAt(i, j));
 			if (abs(getVVelocityAt(i, j)) > max)
 				max = abs(getVVelocityAt(i, j));
 		}
 	}
-	return max;
+
+	return max + sqrt(5*sqrt(cellSize)*9.8);
 }
 
 Vector Grid::interpolateVelocity(Vector position){
@@ -171,4 +173,15 @@ Vector Grid::getCellPosition(int i, int j){
 	xyz[2] = 0; //3D
 
 	return Vector(xyz[0], xyz[1], xyz[2]);
+}
+
+int Grid::getFluidCellCount(){
+	fluidCellCount = 0;
+	for (int i = 0; i < width; i++){
+		for (int j = 0; j < height; j++){
+			if (getCellType(i, j) != FLUID) continue;
+			fluidCellCount++;
+		}
+	}
+	return fluidCellCount;
 }
