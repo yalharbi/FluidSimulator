@@ -31,21 +31,21 @@ float * FluidSimulator::apply(float * Adiag, float * Aplusi, float * Aplusj, flo
 				ans[place] += Aplusj[place] * x[placenj];
 				ans[place] += Aprevi[place] * x[placepi];
 				ans[place] += Aprevj[place] * x[placepj];
-					/*
+				/*
 				for (int k = place - 1; k >= 0; k--){
-					int symIndex = indices[std::make_pair(k,j)];
-					ans[place] += Aplusi[place-1] * x[place-1];
-					ans[place] += Aplusj[place-1] * x[place-1];
-					std::cout << "place" << place<< "placeSym" << symIndex<<"in" << "i" << i << "j" << j << "k" << k << "\n";
+				int symIndex = indices[std::make_pair(k,j)];
+				ans[place] += Aplusi[place-1] * x[place-1];
+				ans[place] += Aplusj[place-1] * x[place-1];
+				std::cout << "place" << place<< "placeSym" << symIndex<<"in" << "i" << i << "j" << j << "k" << k << "\n";
 				}*/
 				/*if (simulationGrid->getCellType(i - 1, j) == FLUID)
-					ans[place] += Aplusi[placepi] * x[placepi];
+				ans[place] += Aplusi[placepi] * x[placepi];
 				if (simulationGrid->getCellType(i, j - 1) == FLUID)
-					ans[place] += Aplusj[placepj] * x[placepj];*/
+				ans[place] += Aplusj[placepj] * x[placepj];*/
 			}
 		}
 	}
-	
+
 
 	return ans;
 }
@@ -58,9 +58,9 @@ inline float * copyV(float * from, int length){
 }
 /* LOG
 6/28/2015: According to (Foster and Fedkiw 2001) air cells only have velocity at their boundaries with fluid cells, also (Bridson 2008) p24
-		   this means u(i,j) is actually the average of the two boundaries, otherwise fluids won't flow into air cells whos velocity is 0 (because we can't trace them back)
-		   TODO: (1) Set all velocities between air cells to 0 (2) Fix getVelocity(i,j) to account for inflow and outflow (two normal velocities)
-		   
+this means u(i,j) is actually the average of the two boundaries, otherwise fluids won't flow into air cells whos velocity is 0 (because we can't trace them back)
+TODO: (1) Set all velocities between air cells to 0 (2) Fix getVelocity(i,j) to account for inflow and outflow (two normal velocities)
+
 */
 
 FluidSimulator::FluidSimulator()
@@ -70,7 +70,7 @@ FluidSimulator::FluidSimulator()
 FluidSimulator::FluidSimulator(int width, int height, int cellSize)
 {
 	simulationGrid = new Grid(width, height, cellSize);
-	for (int i = 11-3; i < 17; i++)
+	for (int i = 11 - 3; i < 25; i++)
 		for (int j = 11; j < 25; j++)
 			simulationGrid->setCell(i, j, FLUID);
 	/*simulationGrid->setCell(3, 5, FLUID); simulationGrid->setCell(4, 5, FLUID); simulationGrid->setCell(2, 5, FLUID);
@@ -80,7 +80,7 @@ FluidSimulator::FluidSimulator(int width, int height, int cellSize)
 		simulationGrid->setCell(i, 0, SOLID);
 	for (int i = 0; i < simulationGrid->height; i++){
 		simulationGrid->setCell(0, i, SOLID);
-		simulationGrid->setCell(simulationGrid->width-1, i, SOLID);
+		simulationGrid->setCell(simulationGrid->width - 1, i, SOLID);
 	}
 	simulationGrid->showVectorField();
 }
@@ -114,12 +114,15 @@ void FluidSimulator::advectVelocity(){
 		}
 	}
 
-	
+
 	//std::cout << simulationGrid->getVelocityVector(4, 2);
 }
 
 void FluidSimulator::addForces(int i, int j){
 	if (simulationGrid->getCellType(i, j) == FLUID){
+		simulationGrid->cells[i][j].v += (-9.8)*dt;
+	}
+	else if ( (simulationGrid->getCellType(i, j + 1) == FLUID || simulationGrid->getCellType(i, j - 1) == FLUID) && simulationGrid->getCellType(i, j) != SOLID){
 		simulationGrid->cells[i][j].v += (-9.8)*dt;
 	}
 
@@ -132,7 +135,7 @@ Cell FluidSimulator::advectCell(int i, int j){
 
 
 	Vector position = simulationGrid->getCellPosition(i, j);
-	Vector midPos = position - simulationGrid->getVelocityVector(i, j)*dt/2;
+	Vector midPos = position - simulationGrid->getVelocityVector(i, j)*dt / 2;
 	Vector tracedParticle = position - simulationGrid->interpolateVelocity(midPos)*dt;
 
 	if (simulationGrid->getCell(tracedParticle).cellType == SOLID)
@@ -173,13 +176,13 @@ float * FluidSimulator::calculateNegativeDivergence(std::map<std::pair<int, int>
 			Cell cell = simulationGrid->cells[i][j];
 			int place = indices[std::make_pair(i, j)];
 			if (simulationGrid->getCellType(i, j + 1) == SOLID){
-				rhs[place] = rhs[place] + simulationGrid->cells[i][j+1].v*scale;
+				rhs[place] = rhs[place] + simulationGrid->cells[i][j + 1].v*scale;
 			}
 			if (simulationGrid->getCellType(i, j - 1) == SOLID){
 				rhs[place] = rhs[place] - simulationGrid->cells[i][j].v*scale;
 			}
-			if (simulationGrid->getCellType(i+1, j) == SOLID){
-				rhs[place] = rhs[place] + simulationGrid->cells[i+1][j].u*scale;
+			if (simulationGrid->getCellType(i + 1, j) == SOLID){
+				rhs[place] = rhs[place] + simulationGrid->cells[i + 1][j].u*scale;
 			}
 			if (simulationGrid->getCellType(i - 1, j) == SOLID){
 				rhs[place] = rhs[place] - simulationGrid->cells[i][j].u*scale;
@@ -209,8 +212,8 @@ float * FluidSimulator::applyPreconditioner(float * Adiag, float * Aplusi, float
 	}
 
 	float * z = new float[simulationGrid->getFluidCellCount()]();
-	for (int i = simulationGrid->width-1; i > 0; i--){ //Ltz = q
-		for (int j = simulationGrid->height-1; j > 0; j--){
+	for (int i = simulationGrid->width - 1; i > 0; i--){ //Ltz = q
+		for (int j = simulationGrid->height - 1; j > 0; j--){
 			int place = indices[std::make_pair(i, j)];
 			int placenj = indices[std::make_pair(i, j + 1)];
 			int placeni = indices[std::make_pair(i + 1, j)];
@@ -237,7 +240,7 @@ void FluidSimulator::project(){
 		}
 	}
 
-	
+
 	pressureCoefficients = new float*[fluidCellsCount];
 	float * rhs = calculateNegativeDivergence(indices);
 
@@ -269,33 +272,33 @@ void FluidSimulator::project(){
 			else if (simulationGrid->getCellType(i, j) == FLUID && simulationGrid->getCellType(i + 1, j) == FREE)
 				Adiag[place] += scale;
 
-			if (simulationGrid->getCellType(i, j) == FLUID && simulationGrid->getCellType(i, j+1) == FLUID){
+			if (simulationGrid->getCellType(i, j) == FLUID && simulationGrid->getCellType(i, j + 1) == FLUID){
 				Adiag[place] += scale;
-				Adiag[indices[std::make_pair(i, j+1)]] += scale;
+				Adiag[indices[std::make_pair(i, j + 1)]] += scale;
 				Aplusj[place] = -scale;
-				Aprevj[indices[std::make_pair(i, j+1)]] = -scale;
+				Aprevj[indices[std::make_pair(i, j + 1)]] = -scale;
 			}
-			else if (simulationGrid->getCellType(i, j) == FLUID && simulationGrid->getCellType(i, j+1) == FREE)
+			else if (simulationGrid->getCellType(i, j) == FLUID && simulationGrid->getCellType(i, j + 1) == FREE)
 				Adiag[place] += scale;
 
 			if (simulationGrid->getCellType(i, j) == FREE && simulationGrid->getCellType(i, j + 1) == FLUID)
 				Adiag[indices[std::make_pair(i, j + 1)]] += scale;
-			if (simulationGrid->getCellType(i, j) == FREE && simulationGrid->getCellType(i+1, j) == FLUID)
-				Adiag[indices[std::make_pair(i+1, j)]] += scale;
-			
+			if (simulationGrid->getCellType(i, j) == FREE && simulationGrid->getCellType(i + 1, j) == FLUID)
+				Adiag[indices[std::make_pair(i + 1, j)]] += scale;
+
 		}
 	}
 	float tau = 0.97, beta = 0.25;
 	for (int i = 1; i < simulationGrid->width; i++){ //compute preconditioner... initial guess for solving the system
 		for (int j = 1; j < simulationGrid->height; j++){
 			int place = indices[std::make_pair(i, j)];
-			int placepj = indices[std::make_pair(i, j-1)];
-			int placepi = indices[std::make_pair(i-1, j)];
+			int placepj = indices[std::make_pair(i, j - 1)];
+			int placepi = indices[std::make_pair(i - 1, j)];
 
 			if (simulationGrid->getCellType(i, j) == FLUID){
 				float e = Adiag[place] - square(Aplusi[placepi] * precon[place]) - square(Aplusj[placepj] * precon[placepj])
-					- tau*(Aplusi[placepi] *Aplusj[placepi] *square(precon[placepi])
-					+ Aplusj[placepj] *Aplusi[placepj] *square(precon[placepj]));
+					- tau*(Aplusi[placepi] * Aplusj[placepi] * square(precon[placepi])
+					+ Aplusj[placepj] * Aplusi[placepj] * square(precon[placepj]));
 				if (e < beta * Adiag[place])
 					e = Adiag[place];
 
@@ -318,7 +321,7 @@ void FluidSimulator::project(){
 		float den = dotproduct(z, s, fluidCellsCount);
 		if (den == 0)
 			break;
-		float alph = dp /den ;
+		float alph = dp / den;
 
 		float maxR = 0;
 		//std::cout << "s0" << s[0];
@@ -347,11 +350,11 @@ void FluidSimulator::project(){
 	//std::cout << "uterations: " << iterations << "\n";
 
 	/*for (int i = 0; i < fluidCellsCount; i++)
-		std::cout << "p: " << p[i] << "\n";*/
+	std::cout << "p: " << p[i] << "\n";*/
 
-	for (int i = 0; i < simulationGrid->width; i++){ 
+	for (int i = 0; i < simulationGrid->width; i++){
 		for (int j = 0; j < simulationGrid->height; j++){
-			float sc =  dt / (DENSITY * sqrt(simulationGrid->getCellSize()));
+			float sc = dt / (DENSITY * sqrt(simulationGrid->getCellSize()));
 			int place = indices[std::make_pair(i, j)];
 			int placenj = indices[std::make_pair(i, j + 1)];
 			int placeni = indices[std::make_pair(i + 1, j)];
@@ -361,7 +364,7 @@ void FluidSimulator::project(){
 				simulationGrid->cells[i + 1][j].u += sc*p[place];
 
 				simulationGrid->cells[i][j].v -= sc*p[place];
-				simulationGrid->cells[i][j+1].v += sc*p[place];
+				simulationGrid->cells[i][j + 1].v += sc*p[place];
 			}
 		}
 	}
@@ -380,7 +383,7 @@ void FluidSimulator::project(){
 
 		}
 	}
-	
+
 	delete[] rhs;
 	delete[] Adiag;
 	delete[] Aplusi;
@@ -388,11 +391,11 @@ void FluidSimulator::project(){
 	delete[] Aplusj;
 	delete[] Aprevi;
 	delete[] Aprevj;
-	
+
 }
 
 float FluidSimulator::computeTimeStep(){
-	float cellSize = 5*sqrt(simulationGrid->getCellSize());
+	float cellSize = 5 * sqrt(simulationGrid->getCellSize());
 	float maxVel = simulationGrid->getMaxVelocity();
 
 	dt = cellSize / maxVel;
