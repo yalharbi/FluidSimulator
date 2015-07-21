@@ -4,24 +4,25 @@
 class FluidSimulator
 {
 	Grid* simulationGrid;
-	float ** pressureCoefficients;
+	double ** pressureCoefficients;
 	void advectVelocity();
 	void advectPressure();
+	void extrapolateVelocity();
 	void addForces(int i, int j);
-	float * calculateNegativeDivergence(std::map<std::pair<int, int>, int> indices);
+	double * calculateNegativeDivergence(std::map<std::pair<int, int>, int> indices);
 	void project();
-	float * approximateVelocity(float * pos);
-	float dt;
-	float * applyPreconditioner(float * Adiag, float * Aplusi, float * Aplusj, float* Aprevi, float * Aprevj, float * precon, float * r, std::map<std::pair<int, int>, int> indices);
-	float * FluidSimulator::apply(float * Adiag, float * Aplusi, float * Aplusj, float * Aprevi, float * Aprevj, float * x, int length, std::map<std::pair<int, int>, int> indices);
+	double * approximateVelocity(double * pos);
+	double dt;
+	double * applyPreconditioner(double * Adiag, double * Aplusi, double * Aplusj, double* Aprevi, double * Aprevj, double * precon, double * r, std::map<std::pair<int, int>, int> indices);
+	double * FluidSimulator::apply(double * Adiag, double * Aplusi, double * Aplusj, double * Aprevi, double * Aprevj, double * x, int length, std::map<std::pair<int, int>, int> indices);
 public:
 	FluidSimulator();
 	FluidSimulator(int width, int height, int cellSize);
 	Cell advectCell(int i, int j);
-	void advect(float timeStep);
+	void advect(double timeStep);
 	void simulateAndDraw();
-	void simulateAndDraw(float timeStep);
-	float computeTimeStep();
+	void simulateAndDraw(double timeStep);
+	double computeTimeStep();
 	void draw();
 };
 

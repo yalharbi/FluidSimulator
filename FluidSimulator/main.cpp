@@ -16,11 +16,11 @@ void display(){
 
 	simulator->draw();
 
-	/*time++;
-	if (time==100){*/
+
+	if (time==0){
 		simulator->simulateAndDraw();
-	/*	time = 0;
-	}*/
+		//time = 1;
+	}
 
 
 
@@ -48,6 +48,11 @@ void idle(){
 	glutPostRedisplay();
 }
 
+void key(unsigned char key, int x, int y){
+	time--;
+	//glutPostRedisplay();
+}
+
 int main(int argc, char** argv){
 	//initialization
 	glutInit(&argc, argv);
@@ -58,6 +63,7 @@ int main(int argc, char** argv){
 	glutReshapeFunc(reshape);
 	glutDisplayFunc(display);
 	glutIdleFunc(idle);
+	glutKeyboardFunc(key);
 
 	glutMainLoop();
 

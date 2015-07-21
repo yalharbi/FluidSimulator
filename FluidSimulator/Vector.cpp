@@ -1,8 +1,8 @@
 
 #include "Vector.h"
 
-float TORAD(float x){
-	return x * 3.14159265 / (float)180 ;
+double TORAD(double x){
+	return x * 3.14159265 / (double)180 ;
 }
 
 Vector::Vector(){
@@ -10,40 +10,40 @@ Vector::Vector(){
 	xyz[1] = 0;
 	xyz[2] = 0;
 }
-Vector::Vector(float x, float y, float z)
+Vector::Vector(double x, double y, double z)
 {
 	xyz[0] = x;
 	xyz[1] = y;
 	xyz[2] = z;
 }
 
-float& Vector::operator[](int i){
+double& Vector::operator[](int i){
 	return xyz[i];
 }
 
 
-float Vector::length(){
+double Vector::length(){
 	return sqrt(xyz[0]*xyz[0] + xyz[1]*xyz[1] + xyz[2]*xyz[2]);
 }
 
 Vector Vector::normalize(){
-	float length = this->length();
+	double length = this->length();
 	return Vector(xyz[0]/length, xyz[1]/length, xyz[2]/length);
 }
 
-float Vector::operator*(Vector LHS){
+double Vector::operator*(Vector LHS){
 	return xyz[0]*LHS[0]+xyz[1]*LHS[1]+xyz[2]*LHS[2];
 }
 Vector Vector::operator^(Vector LHS){
-	float i = xyz[1]*LHS[2]-xyz[2]*LHS[1];
-	float j = -(xyz[0]*LHS[2]-xyz[2]*LHS[0]);
-	float k = xyz[0]*LHS[1]-xyz[1]*LHS[0];
+	double i = xyz[1]*LHS[2]-xyz[2]*LHS[1];
+	double j = -(xyz[0]*LHS[2]-xyz[2]*LHS[0]);
+	double k = xyz[0]*LHS[1]-xyz[1]*LHS[0];
 	return Vector(i, j, k);
 }
-Vector Vector::operator*(float scalar){
+Vector Vector::operator*(double scalar){
 	return Vector(xyz[0]*scalar, xyz[1]*scalar, xyz[2]*scalar);
 }
-Vector Vector::operator/(float scalar){
+Vector Vector::operator/(double scalar){
 	if(scalar==0) return *this;
 	return (*this)*(1/scalar);
 }
@@ -60,7 +60,7 @@ Vector Vector::operator-(Vector LHS){
 
 
 Vector Vector::intersectRayWithPlane(Vector ray, Vector pt, Vector normal){
-	float t = ((pt - ray)*normal) / (ray*normal);
+	double t = ((pt - ray)*normal) / (ray*normal);
 	//std::cout << t << "\n";
 	return ray + ray*t;
 }

@@ -9,7 +9,7 @@
 
 class Grid
 {
-	float cellSize, offset;
+	double cellSize, offset;
 	
 	bool drawVectorField;
 
@@ -18,18 +18,18 @@ public:
 	Cell ** cells;
 	int width, height;
 	Grid();
-	Grid(int w, int h, float cellSize);
+	Grid(int w, int h, double cellSize);
 	void draw();
 	void setCell(int i, int j, CellType cellType);
 	Cell getCell(Vector position);
 	CellType getCellType(int i, int j);
 	void showVectorField();
 	void hideVectorField();
-	float getCellSize();
-	float getMaxVelocity();
+	double getCellSize();
+	double getMaxVelocity();
 	Vector getCellPosition(int i, int j);
-	float getHVelocityAt(int i, int j);
-	float getVVelocityAt(int i, int j);
+	double getHVelocityAt(int i, int j);
+	double getVVelocityAt(int i, int j);
 	Vector getVelocityVector(int i, int j);
 	Vector interpolateVelocity(Vector position);
 	int getFluidCellCount();
