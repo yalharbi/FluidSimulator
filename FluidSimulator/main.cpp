@@ -30,7 +30,7 @@ void display(){
 }
 
 void reshape(int width, int height) {
-	simulator = new FluidSimulator(width, height, 10);
+	simulator = new FluidSimulator(width, height,10);
 	/*grid = new Grid(width, height, 100);
 	grid->showVectorField();
 	/*for (int i = 0; i < width; i++){

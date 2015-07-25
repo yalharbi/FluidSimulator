@@ -10,7 +10,7 @@
 class Grid
 {
 	double cellSize, offset;
-	
+	Vector * markers;
 	bool drawVectorField;
 
 public:
@@ -33,5 +33,8 @@ public:
 	Vector getVelocityVector(int i, int j);
 	Vector interpolateVelocity(Vector position);
 	int getFluidCellCount();
+	Vector Grid::getAveragedVVelocity(int i, int j);
+	Vector Grid::getAveragedHVelocity(int i, int j);
+	Vector Grid::getAveragedVelocity(int i, int j);
 };
 

@@ -3,18 +3,20 @@
 #include <map>
 class FluidSimulator
 {
+	
+	std::map<std::pair<int, int>, int> indices;
 	Grid* simulationGrid;
 	double ** pressureCoefficients;
 	void advectVelocity();
 	void advectPressure();
 	void extrapolateVelocity();
 	void addForces(int i, int j);
-	double * calculateNegativeDivergence(std::map<std::pair<int, int>, int> indices);
+	double * calculateNegativeDivergence();
 	void project();
 	double * approximateVelocity(double * pos);
 	double dt;
-	double * applyPreconditioner(double * Adiag, double * Aplusi, double * Aplusj, double* Aprevi, double * Aprevj, double * precon, double * r, std::map<std::pair<int, int>, int> indices);
-	double * FluidSimulator::apply(double * Adiag, double * Aplusi, double * Aplusj, double * Aprevi, double * Aprevj, double * x, int length, std::map<std::pair<int, int>, int> indices);
+	double * applyPreconditioner(double * Adiag, double * Aplusi, double * Aplusj, double* Aprevi, double * Aprevj, double * precon, double * r);
+	double * FluidSimulator::apply(double * Adiag, double * Aplusi, double * Aplusj, double * Aprevi, double * Aprevj, double * x, int length);
 public:
 	FluidSimulator();
 	FluidSimulator(int width, int height, int cellSize);
